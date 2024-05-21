@@ -1,7 +1,7 @@
 /** Database connection for messagely. */
 
 import pg from "pg";
-import DB_URI from "./config";
+import DB_URI from "./config.js";
 const Client = pg.Client;
 
 const client = new Client(DB_URI);

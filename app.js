@@ -4,6 +4,9 @@ import cors from "cors";
 import express from "express";
 import ExpressError from "./expressError.js";
 import { authenticateJWT } from "./middleware/auth.js";
+import authRoutes from "./routes/auth.js";
+import messageRoutes from "./routes/messages.js";
+import userRoutes from "./routes/users.js";
 
 const app = express();
 
@@ -18,10 +21,6 @@ app.use(cors());
 app.use(authenticateJWT);
 
 /** routes */
-
-const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/users");
-const messageRoutes = require("./routes/messages");
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
