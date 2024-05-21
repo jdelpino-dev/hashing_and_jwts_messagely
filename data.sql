@@ -1,3 +1,5 @@
+\c messagely;
+
 -- Drop existing tables if they exist
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS users;
