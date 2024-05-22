@@ -17,7 +17,7 @@ class User {
 
   /** Authenticate: is this username/password valid? Returns boolean. */
   static async authenticate(username, password) {
-    const user = User.get(username);
+    const user = await User.get(username);
     if (!user) {
       return false;
     }
