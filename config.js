@@ -1,9 +1,6 @@
 /** Common config for message.ly */
 
-// read .env files and make environmental variables
-
-// @ts-ignore
-import "dotenv/config";
+import "dotenv/config"; // read .env files and make changes to env variables
 
 const DB_URI =
   process.env.NODE_ENV === "test"
