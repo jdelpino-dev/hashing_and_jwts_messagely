@@ -2,6 +2,7 @@
 
 import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../config.js";
+import ExpressError from "../expressError.js";
 
 /** Middleware: Authenticate user. */
 // I updated this function to use current best practices for token handling.
@@ -15,34 +16,35 @@ function authenticateJWT(req, res, next) {
     req.user = payload;
     return next();
   } catch (e) {
-    return next();
+    console.error(e);
+    const error = new ExpressError("Unauthorized:", 401);
+    return next(error);
   }
 }
 
 /** Middleware: Requires user is authenticated. */
 
 function ensureLoggedIn(req, res, next) {
-  if (!req.user) {
-    return next({ status: 401, message: "Unauthorized" });
-  } else {
-    return next();
+  try {
+    if (req.user) {
+      return next();
+    } else {
+      throw ExpressError("Unauthorized", 401);
+    }
+  } catch (err) {
+    return next(err);
   }
 }
 
 /** Middleware: Requires correct username. */
 
+/** Middleware: Requires correct username. */
 function ensureCorrectUser(req, res, next) {
-  try {
-    if (req.user.username === req.params.username) {
-      return next();
-    } else {
-      return next({ status: 401, message: "Unauthorized" });
-    }
-  } catch (err) {
-    // errors would happen here if we made a request and req.user is undefined
-    return next({ status: 401, message: "Unauthorized" });
+  if (!req.user || req.user.username !== req.params.username) {
+    return next(new ExpressError("Unauthorized", 401));
+  } else {
+    return next();
   }
 }
-// end
 
 export { authenticateJWT, ensureCorrectUser, ensureLoggedIn };
