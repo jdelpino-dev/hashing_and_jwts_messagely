@@ -1,12 +1,10 @@
-/** POST /login - login: {username, password} => {token}
- *
- * Make sure to update their last-login!
- *
- **/
+import { default as Router } from "express";
+import { loginUser, registerNewUser } from "./middleware/auth.js";
 
-/** POST /register - register user: registers, logs in, and returns token.
- *
- * {username, password, first_name, last_name, phone} => {token}.
- *
- *  Make sure to update their last-login!
- */
+const router = new Router();
+
+router.post("/login", loginUser);
+
+router.post("/register", registerNewUser);
+
+export default router;
