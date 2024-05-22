@@ -16,24 +16,19 @@ function authenticateJWT(req, res, next) {
     const payload = jwt.verify(token, SECRET_KEY);
     req.user = payload;
     return next();
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     const error = new ExpressError("Unauthorized:", 401);
     return next(error);
   }
 }
 
 /** Middleware: Requires user is authenticated. */
-
 function ensureLoggedIn(req, res, next) {
-  try {
-    if (req.user) {
-      return next();
-    } else {
-      throw ExpressError("Unauthorized", 401);
-    }
-  } catch (err) {
-    return next(err);
+  if (req.user) {
+    return next();
+  } else {
+    return next(new ExpressError("Unauthorized", 401));
   }
 }
 
@@ -46,24 +41,27 @@ function ensureCorrectUser(req, res, next) {
   }
 }
 
+/** Middleware: Logs the user in. */
 async function loginUser(req, res, next) {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
       throw new ExpressError("Username and password required", 400);
     }
-    if (User.authenticate(username, password)) {
+    const isAuthenticated = await User.authenticate(username, password);
+    if (isAuthenticated) {
       await User.updateLoginTimestamp(username);
       const token = jwt.sign({ username }, SECRET_KEY);
       return res.json({ message: `Logged in!`, token });
     }
     throw new ExpressError("Invalid username/password", 400);
-  } catch (e) {
-    return next(e);
+  } catch (err) {
+    return next(err);
   }
 }
 
-async function registerUser(req, res, next) {
+/** Middleware: Registers a ne user. */
+async function registerNewUser(req, res, next) {
   try {
     const { username, password, first_name, last_name, phone } = req.body;
     if (!username || !password || !first_name || !last_name || !phone) {
@@ -94,5 +92,5 @@ export {
   ensureCorrectUser,
   ensureLoggedIn,
   loginUser,
-  registerUser,
+  registerNewUser,
 };
