@@ -1,12 +1,12 @@
 /** User class for message.ly */
 
-/** User of the site. */
+import bcrypt from "bcrypt";
 
+/** User of the site. */
 class User {
   /** register new user -- returns
    *    {username, password, first_name, last_name, phone}
    */
-
   static async register({
     username,
     password,
@@ -16,16 +16,19 @@ class User {
   }) {}
 
   /** Authenticate: is this username/password valid? Returns boolean. */
-
-  static async authenticate(username, password) {}
+  static async authenticate(username, password) {
+    const user = User.get(username);
+    if (!user) {
+      return false;
+    }
+    return await bcrypt.compare(password, user.password);
+  }
 
   /** Update last_login_at for user */
-
   static async updateLoginTimestamp(username) {}
 
   /** All: basic info on all users:
    * [{username, first_name, last_name, phone}, ...] */
-
   static async all() {}
 
   /** Get: get user by username
@@ -36,7 +39,6 @@ class User {
    *          phone,
    *          join_at,
    *          last_login_at } */
-
   static async get(username) {}
 
   /** Return messages from this user.
@@ -46,7 +48,6 @@ class User {
    * where to_user is
    *   {username, first_name, last_name, phone}
    */
-
   static async messagesFrom(username) {}
 
   /** Return messages to this user.
@@ -56,7 +57,6 @@ class User {
    * where from_user is
    *   {username, first_name, last_name, phone}
    */
-
   static async messagesTo(username) {}
 }
 
