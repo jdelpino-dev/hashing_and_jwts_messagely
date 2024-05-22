@@ -67,15 +67,15 @@ async function registerNewUser(req, res, next) {
     if (!username || !password || !first_name || !last_name || !phone) {
       throw new ExpressError("All fields required", 400);
     }
-    await User.register({
+    const user = await User.register({
       username,
       password,
       first_name,
       last_name,
       phone,
     });
-    const token = jwt.sign({ username }, SECRET_KEY);
-    return res.json({ message: `Welcome ${username}!`, token });
+    const token = jwt.sign({ username: user.username }, SECRET_KEY);
+    return res.json({ message: `Welcome ${user.username}!`, token });
   } catch (err) {
     if (err.code === "23505") {
       // 23505 is the Postgres unique constraint error code
