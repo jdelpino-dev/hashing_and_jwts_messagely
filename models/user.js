@@ -33,10 +33,12 @@ class User {
 
   /** Authenticate: is this username/password valid? Returns boolean. */
   static async authenticate(username, password) {
-    const user = await this.get(username);
-    if (!user) {
-      return false;
-    }
+    const result = await db.query(
+      `SELECT username, password FROM users WHERE username = $1`,
+      [username.toLowerCase()]
+    );
+    const user = result.rows[0];
+    if (!user) return false;
     return await bcrypt.compare(password, user.password);
   }
 
@@ -89,10 +91,10 @@ class User {
     return user.rows[0];
   }
 
-  /** embedUsers:  */
-  static embedUsersInfo(rows) {
+  /** embedUsers: */
+  static embedUsersInfo(rows, keyName) {
     for (let row of rows) {
-      row.to_user = {
+      row[keyName] = {
         username: row.username,
         first_name: row.first_name,
         last_name: row.last_name,
@@ -102,6 +104,8 @@ class User {
       delete row.first_name;
       delete row.last_name;
       delete row.phone;
+      delete row.to_username; // Remove to_username if it exists
+      delete row.from_username; // Remove from_username if it exists
     }
     return rows;
   }
@@ -119,18 +123,19 @@ class User {
               m.body,
               m.sent_at,
               m.read_at,
-              u.username,
-              u.first_name,
-              u.last_name,
-              u.phone
+              m.to_username,
+              u2.username,
+              u2.first_name,
+              u2.last_name,
+              u2.phone
           FROM messages AS m
-          JOIN users AS u
-          ON m.from_username = u.username
-        WHERE m.to_username = $1
+          JOIN users AS u1 ON m.from_username = u1.username
+          JOIN users AS u2 ON m.to_username = u2.username
+        WHERE m.from_username = $1
         ORDER BY m.sent_at DESC`,
       [username.toLowerCase()]
     );
-    return this.embedUsersInfo(result.rows);
+    return this.embedUsersInfo(result.rows, "to_user");
   }
 
   /** Return messages to this user.
@@ -146,18 +151,18 @@ class User {
               m.body,
               m.sent_at,
               m.read_at,
-              u.username,
-              u.first_name,
-              u.last_name,
-              u.phone
+              u2.username,
+              u2.first_name,
+              u2.last_name,
+              u2.phone
           FROM messages AS m
-          JOIN users AS u
-          ON m.to_username = u.username
-        WHERE m.from_username = $1
+          JOIN users AS u1 ON m.to_username = u1.username
+          JOIN users AS u2 ON m.from_username = u2.username
+        WHERE m.to_username = $1
         ORDER BY m.sent_at DESC`,
       [username.toLowerCase()]
     );
-    return this.embedUsersInfo(result.rows);
+    return this.embedUsersInfo(result.rows, "from_user");
   }
 }
 
