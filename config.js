@@ -10,7 +10,7 @@ const DB_URI =
     ? "postgresql:///messagely-test"
     : "postgresql:///messagely";
 
-const SECRET_KEY = process.env.SECRET_KEY || "secret";
+const SECRET_KEY = process.env.SECRET_KEY || ")/$·%secretura-48124628·$&%16";
 
 const BCRYPT_WORK_FACTOR = 12;
 
