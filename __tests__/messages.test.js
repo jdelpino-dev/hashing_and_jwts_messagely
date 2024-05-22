@@ -3,6 +3,7 @@ import db from "../db.js";
 import Message from "../models/message.js";
 import User from "../models/user.js";
 
+const originalNodeEnv = process.env.NODE_ENV;
 process.env.NODE_ENV = "test";
 
 describe("Test Message class", function () {
@@ -59,6 +60,7 @@ describe("Test Message class", function () {
     await db.query("DELETE FROM users");
     await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
     await db.end();
+    process.env.NODE_ENV = originalNodeEnv;
   });
 
   test("can create", async function () {
