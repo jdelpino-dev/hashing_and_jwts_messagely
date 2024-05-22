@@ -1,10 +1,10 @@
 import { default as Router } from "express";
-import User from "../models/user.js";
 import {
   authenticateJWT,
   ensureCorrectUser,
   ensureLoggedIn,
-} from "./middleware/auth.js";
+} from "../middleware/auth.js";
+import User from "../models/user.js";
 
 const router = new Router();
 
@@ -13,8 +13,8 @@ const router = new Router();
  * => {users: [{username, first_name, last_name, phone}, ...]}
  *
  **/
-router.get("/", authenticateJWT, ensureLoggedIn, (req, res) => {
-  res.json({ users: User.all() });
+router.get("/", authenticateJWT, ensureLoggedIn, async (req, res) => {
+  res.json({ users: await User.all() });
 });
 
 /** GET /:username - get detail of users.
@@ -27,8 +27,8 @@ router.get(
   authenticateJWT,
   ensureLoggedIn,
   ensureCorrectUser,
-  (req, res) => {
-    const user = User.get(req.params.username);
+  async (req, res) => {
+    const user = await User.get(req.params.username);
     if (user) {
       res.json({ user: user });
     } else {
@@ -51,8 +51,8 @@ router.get(
   authenticateJWT,
   ensureLoggedIn,
   ensureCorrectUser,
-  (req, res) => {
-    const messages = User.messagesTo(req.params.username);
+  async (req, res) => {
+    const messages = await User.messagesTo(req.params.username);
     res.json({ messages: messages });
   }
 );
@@ -67,12 +67,12 @@ router.get(
  *
  **/
 router.get(
-  ":username/from",
+  "/:username/from",
   authenticateJWT,
   ensureLoggedIn,
   ensureCorrectUser,
-  (req, res) => {
-    const messages = User.messagesFrom(req.params.username);
+  async (req, res) => {
+    const messages = await User.messagesFrom(req.params.username);
     res.json({ messages: messages });
   }
 );

@@ -1,5 +1,5 @@
 import { default as Router } from "express";
-import { loginUser, registerNewUser } from "./middleware/auth.js";
+import { loginUser, registerNewUser } from "../middleware/auth.js";
 
 const router = new Router();
 
