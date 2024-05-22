@@ -3,7 +3,6 @@
 import cors from "cors";
 import express from "express";
 import ExpressError from "./expressError.js";
-import { authenticateJWT } from "./middleware/auth.js";
 import authRoutes from "./routes/auth.js";
 import messageRoutes from "./routes/messages.js";
 import userRoutes from "./routes/users.js";
@@ -18,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 // get auth token for all routes
-app.use(authenticateJWT);
+// app.use(authenticateJWT);
 
 /** routes */
 
