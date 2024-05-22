@@ -4,14 +4,17 @@ import jwt from "jsonwebtoken";
 import { SECRET_KEY } from "../config.js";
 
 /** Middleware: Authenticate user. */
-
+// I updated this function to use current best practices for token handling.
+// It expect the token to be in the authentication header and not in the body
+// of the request. Sending tokens in the body is not secure.
 function authenticateJWT(req, res, next) {
   try {
-    const tokenFromBody = req.body._token;
-    const payload = jwt.verify(tokenFromBody, SECRET_KEY);
-    req.user = payload; // create a current user
+    const authHeader = req.headers.authorization;
+    const token = authHeader.replace("Bearer ", "");
+    const payload = jwt.verify(token, SECRET_KEY);
+    req.user = payload;
     return next();
-  } catch (err) {
+  } catch (e) {
     return next();
   }
 }
