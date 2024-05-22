@@ -1,11 +1,29 @@
+import "dotenv/config"; // read .env files and make changes to env variables
 import db from "../db.js";
 import Message from "../models/message.js";
 import User from "../models/user.js";
 
+process.env.NODE_ENV = "test";
+
+afterAll(async function () {
+  await db.query("DELETE FROM messages");
+  await db.query("DELETE FROM users");
+  await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
+  await db.end();
+});
+
 describe("Test User class", function () {
+  beforeAll(async function () {
+    await db.query("DELETE FROM messages");
+    await db.query("DELETE FROM users");
+    await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
+  });
+
   beforeEach(async function () {
     await db.query("DELETE FROM messages");
     await db.query("DELETE FROM users");
+    await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
+
     let u = await User.register({
       username: "test",
       password: "password",
@@ -13,6 +31,18 @@ describe("Test User class", function () {
       last_name: "Testy",
       phone: "+14155550000",
     });
+  });
+
+  afterEach(async function () {
+    await db.query("DELETE FROM messages");
+    await db.query("DELETE FROM users");
+    await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
+  });
+
+  afterAll(async function () {
+    await db.query("DELETE FROM messages");
+    await db.query("DELETE FROM users");
+    await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
   });
 
   test("can register", async function () {
@@ -105,6 +135,18 @@ describe("Test messages part of User class", function () {
     });
   });
 
+  afterEach(async function () {
+    await db.query("DELETE FROM messages");
+    await db.query("DELETE FROM users");
+    await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
+  });
+
+  afterAll(async function () {
+    await db.query("DELETE FROM messages");
+    await db.query("DELETE FROM users");
+    await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
+  });
+
   test("can get messages from user", async function () {
     let m = await User.messagesFrom("test1");
     expect(m).toEqual([
@@ -140,8 +182,4 @@ describe("Test messages part of User class", function () {
       },
     ]);
   });
-});
-
-afterAll(async function () {
-  await db.end();
 });

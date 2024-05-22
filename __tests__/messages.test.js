@@ -1,15 +1,27 @@
+import "dotenv/config"; // read .env files and make changes to env variables
 import db from "../db.js";
 import Message from "../models/message.js";
 import User from "../models/user.js";
 
+process.env.NODE_ENV = "test";
+
 describe("Test Message class", function () {
   let u1, u2;
   let m1, m2;
+
+  beforeAll(async function () {
+    await db.query("DELETE FROM messages");
+    await db.query("DELETE FROM users");
+    await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
+  });
+
   beforeEach(async function () {
+    // Clear tables and reset sequence
     await db.query("DELETE FROM messages");
     await db.query("DELETE FROM users");
     await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
 
+    // Create users
     u1 = await User.register({
       username: "test1",
       password: "password",
@@ -24,6 +36,12 @@ describe("Test Message class", function () {
       last_name: "Testy2",
       phone: "+14155552222",
     });
+
+    // Verify users were created
+    const users = await User.all();
+    expect(users).toHaveLength(2);
+
+    // Create messages
     m1 = await Message.create({
       from_username: "test1",
       to_username: "test2",
@@ -36,14 +54,21 @@ describe("Test Message class", function () {
     });
   });
 
+  afterAll(async function () {
+    await db.query("DELETE FROM messages");
+    await db.query("DELETE FROM users");
+    await db.query("ALTER SEQUENCE messages_id_seq RESTART WITH 1");
+    await db.end();
+  });
+
   test("can create", async function () {
-    let m = await Message.create({
+    const message = await Message.create({
       from_username: "test1",
       to_username: "test2",
       body: "new",
     });
 
-    expect(m).toEqual({
+    expect(message).toEqual({
       id: expect.any(Number),
       from_username: "test1",
       to_username: "test2",
@@ -53,14 +78,14 @@ describe("Test Message class", function () {
   });
 
   test("can mark read", async function () {
-    Message.markRead(m1.id);
+    await Message.markRead(m1.id);
     m1 = await Message.get(m1.id);
     expect(m1.read_at).toEqual(expect.any(Date));
   });
 
   test("can get", async function () {
-    let u = await Message.get(1);
-    expect(u).toEqual({
+    const message = await Message.get(m1.id);
+    expect(message).toEqual({
       id: expect.any(Number),
       body: "u1-to-u2",
       sent_at: expect.any(Date),
@@ -79,8 +104,4 @@ describe("Test Message class", function () {
       },
     });
   });
-});
-
-afterAll(async function () {
-  await db.end();
 });
